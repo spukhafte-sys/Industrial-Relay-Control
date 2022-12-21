@@ -2,7 +2,7 @@
 
 ## What This Library is For
 
->This library is for any ProXR board and any Relay Expansion Board that can be connected to them.
+>This Python3 library is for any ProXR board and any Relay Expansion Board that can be connected to them.
 >This does not include UXP Expansion boards with things such as ADC, Contact Closure, or Potentiometers.
 >Below are some links to pertinent products:
 >ProXR https://store.ncd.io/?fwp_main_facet=ncd-industrial&fwp_product_type=relay-controllers&fwp_series=proxr
@@ -14,7 +14,7 @@
 
 ### What This Library Does
 
->Allows you to use serial ports or TCP/IP sockets interchangeably with just a simple Communication object declaration
+>Uses VISA's interface abstraction to control instruments that connect via Serial, USB, TCPIP, etc.
 >Allows multiple ways to control relays based on what works best for you and your application with no bit manipulation or direct byte writes
 >Allows you to easily get ADC/Sensor Readings in bulk or in singular at 8 or 10 bit resolution.
 >On, off, and toggle commands.
