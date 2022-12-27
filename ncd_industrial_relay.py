@@ -8,6 +8,14 @@ class Relay_Controller:
         command = self.wrap_in_api([254, 33])
         return self.process_control_command_return(self.send_command(command, 4))
 
+    def turn_on_auto_refresh(self):
+        command = self.wrap_in_api([254, 125])
+        return self.process_control_command_return(self.send_command(command, 4))
+
+    def turn_off_auto_refresh(self):
+        command = self.wrap_in_api([254, 126])
+        return self.process_control_command_return(self.send_command(command, 4))
+
     def set_relay_bank_status(self, status, bank = 1):
         command = self.wrap_in_api([254, 140, status, bank])
         return self.process_control_command_return(self.send_command(command, 4))
@@ -78,13 +86,17 @@ class Relay_Controller:
         command = self.wrap_in_api([254,124, bank])
         return self.process_read_command_return(self.send_command(command, 4))
 
+    def turn_off_all_relays(self, bank = 1):
+        command = self.wrap_in_api([254,129, bank])
+        return self.process_read_command_return(self.send_command(command, 4))
+
     def get_relay_status_by_index(self, relay):
         lsb = relay-1 & 255
         msb = relay >> 8
         command = self.wrap_in_api([254, 44, lsb, msb])
         return self.process_read_command_return(self.send_command(command, 4))
 
-    def get_relay_status_by_index_fusion(self, relay):
+    def fusion_get_relay_status_by_index(self, relay):
         lsb = relay-1 & 255
         msb = relay >> 8
         command = self.wrap_in_api([254, 144, lsb, msb])
@@ -273,6 +285,10 @@ class Relay_Controller:
     def lantronix_read_amps(self):
         command = self.wrap_in_api([188, 50, 10, 84, 146, 106, 1, 1, 6, 0, 0, 4, 85, 19])
         return self.process_control_command_return(self.send_command(command, 32))
+
+    def raw_command(self, command):
+        command = self.wrap_in_api(command)
+        return self.process_control_command_return(self.send_command(command, 4))
 
     def close(self):
         return self.instr.close()
