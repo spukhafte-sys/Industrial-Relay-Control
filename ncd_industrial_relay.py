@@ -290,5 +290,46 @@ class Relay_Controller:
         command = self.wrap_in_api(command)
         return self.process_control_command_return(self.send_command(command, 4))
 
+    def get_device_info(self):
+
+        # Get name which is padded with spaces
+        self.name = ''
+        for i in range(144,160):
+            command = self.wrap_in_api([254, 53, i])
+            resp = self.process_read_command_return(self.send_command(command, 4))
+            if resp:
+                if resp[0]:
+                    self.name += chr(resp[0])
+                else:
+                    break
+            else:
+                return False
+
+        self.name = self.name.strip()
+
+        # Get serial number
+        self.sn = 0
+        for i in range(232,234):
+            command = self.wrap_in_api([254, 53, i])
+            resp = self.process_read_command_return(self.send_command(command, 4))
+            if resp:
+                self.sn <<= 8
+                self.sn += resp[0]
+            else:
+                return False
+
+        # Get version number
+        self.ver = []
+        for i in range(240,242):
+            command = self.wrap_in_api([254, 53, i])
+            resp = self.process_read_command_return(self.send_command(command, 4))
+            if resp:
+                self.ver += resp
+            else:
+                return False
+
+        self.ver = '4.%d.%d' % tuple(self.ver)
+        return True
+
     def close(self):
         return self.instr.close()
