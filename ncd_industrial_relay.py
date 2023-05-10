@@ -1,4 +1,3 @@
-
 class Relay_Controller:
     def __init__(self, instr, kwargs={}):
         self.__dict__.update(kwargs)
@@ -154,9 +153,17 @@ class Relay_Controller:
         data = self.add_checksum(data)
         return data
 
+    NUM_RETRIES = 4
     def send_command(self, command, bytes_back):
         self.instr.write_raw(bytes(command))
-        return self.instr.read_raw(bytes_back)
+       #return(self.instr.read_raw(bytes_back))
+        for i in range(self.NUM_RETRIES):
+            if len(resp := self.instr.read_raw(bytes_back)):
+                break
+            else:
+                self.instr.write_raw(bytes(command))  # try again
+                print(f'tmo:{i}', end='')
+        return(resp)
 
     def process_control_command_return(self, data):
         # print(data).encode('hex');
