@@ -1,7 +1,7 @@
 class Relay_Controller:
-    def __init__(self, instr, kwargs={}):
+    def __init__(self, combus, kwargs={}):
         self.__dict__.update(kwargs)
-        self.renew_replace_interface(instr)
+        self.renew_replace_interface(combus)
 
     def test_comms(self):
         command = self.wrap_in_api([254, 33])
@@ -155,14 +155,14 @@ class Relay_Controller:
 
     NUM_RETRIES = 4
     def send_command(self, command, bytes_back):
-        self.instr.write_raw(bytes(command))
-       #return(self.instr.read_raw(bytes_back))
+        self._write(bytes(command))
+       #return(self.combus.read_raw(bytes_back))
         for i in range(self.NUM_RETRIES):
-            if len(resp := self.instr.read_raw(bytes_back)):
+            if len(resp := self._read(bytes_back)):
                 break
             else:
-                self.instr.write_raw(bytes(command))  # try again
-                print(f'tmo:{i}', end='')
+                self._write(bytes(command))  # try again
+#               print(f'tmo:{i}', end='')
         return(resp)
 
     def process_control_command_return(self, data):
@@ -229,8 +229,20 @@ class Relay_Controller:
             return data
         return False
 
-    def renew_replace_interface(self, instr):
-        self.instr = instr
+    def renew_replace_interface(self, combus):
+        self._combus_type = str(type(combus))
+        self._close = combus.close
+        if self._combus_type.startswith('pyvisa.resources'):
+                combus.write_termination = None
+                combus.read_termination = None
+                combus.timeout = 1000
+                combus.baud_rate = 115200
+                combus.end_input = 0  # pyvisa.constants.SerialTermination.none
+                self._write = combus.write_raw
+                self._read = combus.read_raw
+        else:
+            self._write = combus.write
+            self._read = combus.read
 
     def reactor_read_timers(self):
         command = self.wrap_in_api([254, 55, 3, 136, 16])
@@ -342,4 +354,4 @@ class Relay_Controller:
         return self.process_control_command_return(self.send_command(command, 4))
 
     def close(self):
-        return self.instr.close()
+        return self._close()
